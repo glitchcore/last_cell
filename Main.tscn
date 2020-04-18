@@ -62,7 +62,7 @@ material/0 = SubResource( 3 )
 
 [node name="Camera" type="Camera" parent="PlayerCenter"]
 transform = Transform( 1, 0, 0, 0, 0.682177, 0.731187, 0, -0.731187, 0.682177, 0, 2.60328, 2.64749 )
-fov = 66.047
+fov = 52.9206
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 transform = Transform( -10, 3.25841e-06, 0, 5.30863e-13, 1.62921e-06, 0, 3.25841e-06, 10, 0, 0, 0, 0 )

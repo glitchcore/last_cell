@@ -19,8 +19,6 @@ func _ready():
 	node_2d = get_node("Viewport/Node2D")
 	
 	# draw grid
-	
-	
 	for x in range(X_SIZE):
 		var new_line = Line2D.new()
 		new_line.add_point(Vector2(viewport_size.x * float(x)/X_SIZE, viewport_size.y * 0.0))
