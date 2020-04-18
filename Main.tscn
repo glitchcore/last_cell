@@ -37,22 +37,6 @@ render_target_v_flip = true
 
 [node name="Node2D" type="Node2D" parent="Viewport"]
 
-[node name="Label" type="Label" parent="Viewport/Node2D"]
-margin_right = 40.0
-margin_bottom = 14.0
-text = "*"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Line2D" type="Line2D" parent="Viewport/Node2D"]
-rotation = -0.679789
-points = PoolVector2Array( 0, 0, 5.2372, 74.8011, 44.6477, 144.953 )
-width = 2.0
-
-[node name="Polygon2D" type="Polygon2D" parent="Viewport/Node2D"]
-polygon = PoolVector2Array( 4.06805, 6.00502, 8.46411, 33.0425, 49.9865, 47.2625, 29.2631, 6.10644, 36.9041, -17.5807 )
-
 [node name="PlayerCenter" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
 script = ExtResource( 3 )
