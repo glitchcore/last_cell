@@ -13,8 +13,4 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	var position = get_point_position(0)
-	position.x += 10 * delta
-	position.y += 10 * delta
-	set_point_position(0, position)
-#	pass
+	pass
