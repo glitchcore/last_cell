@@ -91,7 +91,7 @@ func sort(dict):
 func _process(_delta):
 	# optional skip frames
 	frame_count += 1
-	if frame_count % 10 != 0:
+	if frame_count % 1 != 0:
 		return
 	
 	var new_cells_state = []
