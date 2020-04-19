@@ -25,7 +25,7 @@ func _ready():
 	rng.randomize()
 	
 	conway = load("res://conway.gd").new(viewport_size, rng, node_2d, get_node("MeshInstance").scale)
-	sphere_playground = load("res://sphere_playground.gd").new(viewport_size, rng, node_2d)
+	sphere_playground = load("res://sphere_playground.gd").new(viewport_size, rng, node_2d, get_node("MeshInstance").scale)
 	
 	for _x in range(cell_fn.X_SIZE):
 		var col = []
