@@ -108,6 +108,8 @@ func handle_sphere(state, neighbours):
 func handle_free(state, neighbours):
 	var new_state = state
 	
+	new_state.force = [0, 0, 0, 0]
+	
 	# handle external sphere
 	new_state.sphere_mass += neighbours[0].force[2]
 	new_state.sphere_mass += neighbours[1].force[3]
