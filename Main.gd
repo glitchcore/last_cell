@@ -91,7 +91,7 @@ func sort(dict):
 func _process(_delta):
 	# optional skip frames
 	frame_count += 1
-	if frame_count % 10 != 0:
+	if frame_count % 1 != 0:
 		return
 	
 	var new_cells_state = []
@@ -107,23 +107,25 @@ func _process(_delta):
 			
 			var is_player = (player != null and player.x == x and player.y == y)
 			
-			var neighbours_ids
+			var neighbours_ids = null
 			
 			if current_cell.dirty or is_player:
 				# make a calculations
+				if current_cell.dirty:
+					print("update dirty ", x, " ", y)
 				
 				neighbours_ids = cell_fn.get_neighbours_id(x, y)
 				
 				match current_cell.state.cell_fn:
 					cell_fn.FN_CONWAYS_LIFE:
 						new_cell_state = conway.update_cell(
-							current_cell.state,
+							current_cell.state.duplicate(),
 							cell_fn.get_neighbours(cells_state, neighbours_ids)
 						)
 					
 					cell_fn.FN_SPHERE_PLAYGROUND:
 						new_cell_state = sphere_playground.update_cell(
-							current_cell.state,
+							current_cell.state.duplicate(),
 							cell_fn.get_neighbours(cells_state, neighbours_ids)
 						)
 					_:
@@ -131,8 +133,10 @@ func _process(_delta):
 			
 			var new_cell = {}
 			
-			if (new_cell_state != null and \
-				sort(new_cell_state).hash() != sort(current_cell.state).hash()) or is_player:
+			var need_update = new_cell_state != null and \
+				sort(new_cell_state).hash() != sort(current_cell.state).hash()
+			
+			if need_update or is_player:
 				new_cell = {
 					"state": new_cell_state,
 					"geometry": current_cell.geometry,
@@ -153,9 +157,11 @@ func _process(_delta):
 						plane_size.y * (player.y - 0.5) / cell_fn.Y_SIZE - plane_size.y/2
 					)
 					player_node.rotation_degrees.y = player.rotation - 180
-					
-				for id in neighbours_ids:
-					dirty_neighbours.append(id)
+				
+				if need_update:
+					assert(neighbours_ids != null)
+					for id in neighbours_ids:
+						dirty_neighbours.append(id)
 				
 			else:
 				new_cell = current_cell
