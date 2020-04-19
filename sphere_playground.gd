@@ -17,7 +17,7 @@ func init_cell():
 		"sphere_mass": 0,
 		"rotate": 0,
 		"force_value": 0,
-		"force": [0, 0, 0, 0, 0, 0, 0, 0],
+		"force": [0, 0, 0, 0], # top right down left
 		"is_player": false
 	}
 
@@ -33,7 +33,7 @@ func draw_cell(cell, x, y):
 		"r:" + str(cell.state.rotate) + "\n" + \
 		"f:" + str(cell.state.force_value) + " " + \
 		("p" if cell.state.is_player else "") + \
-		"" # str(cell.calc_count)
+		str(cell.calc_count)
 	
 	if cell.geometry == null:
 		var label = Label.new()
@@ -49,24 +49,60 @@ func draw_cell(cell, x, y):
 		cell.geometry.text = label_text
 		return cell.geometry
 
-func handle_ui(current_cell):
+func handle_ui(state):
+	var new_state = state
+	
 	if Input.is_action_pressed("ui_up"):
 		# print("up")
-		current_cell.force_value = 100
+		new_state.force_value = 1
 	else:
-		current_cell.force_value = 0
+		new_state.force_value = 0
 		
-	return current_cell
-
-func update_cell(current_state, _neighbours):
-	var new_state
-	
-	if current_state.is_player:
-		new_state = handle_ui(current_state)
-	else:
-		new_state = current_state
-	
 	return new_state
+
+func handle_sphere(state, neighbours):
+	var new_state = state
+	
+	var force_direction = (int((state.rotate - 45)/90) + 1) % 4
+	var next_cell = neighbours[force_direction]
+	
+	new_state.force = [0, 0, 0, 0]
+	new_state.force[force_direction] = state.force_value
+	
+	if state.force_value > 0:
+		# if next_cell is empty or true type
+		if next_cell.sphere_mass < 0 or true:
+			new_state.sphere_mass = state.sphere_mass - state.force_value
+		
+	# handle external sphere
+	new_state.sphere_mass += neighbours[0].force[2]
+	new_state.sphere_mass += neighbours[1].force[3]
+	new_state.sphere_mass += neighbours[2].force[0]
+	new_state.sphere_mass += neighbours[3].force[1]
+			
+	return new_state
+
+
+func update_cell(old_state, neighbours):
+	var state = old_state
+	
+	if state.is_player:
+		state = handle_ui(state)
+	else:
+		state = state
+	
+	# fet Von-neumann 1 rank
+	var vonneuman_neighbours = [
+		neighbours[1],
+		neighbours[3],
+		neighbours[5],
+		neighbours[7]
+	]
+	
+	if state.sphere_mass > 0:
+		state = handle_sphere(state, vonneuman_neighbours)
+	
+	return state
 
 func get_player(current_cell, x, y):
 	if current_cell.state.is_player:

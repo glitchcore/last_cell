@@ -107,10 +107,12 @@ func _process(_delta):
 			
 			var is_player = (player != null and player.x == x and player.y == y)
 			
+			var neighbours_ids
+			
 			if current_cell.dirty or is_player:
 				# make a calculations
 				
-				var neighbours_ids = cell_fn.get_neighbours_id(x, y)
+				neighbours_ids = cell_fn.get_neighbours_id(x, y)
 				
 				match current_cell.state.cell_fn:
 					cell_fn.FN_CONWAYS_LIFE:
@@ -126,10 +128,6 @@ func _process(_delta):
 						)
 					_:
 						pass
-				
-				if new_cell_state != current_cell.state:
-					for id in neighbours_ids:
-						dirty_neighbours.append(id)
 			
 			var new_cell = {}
 			
@@ -154,7 +152,10 @@ func _process(_delta):
 						0,
 						plane_size.y * (player.y - 0.5) / cell_fn.Y_SIZE - plane_size.y/2
 					)
-					player_node.rotation_degrees.y = player.rotation
+					player_node.rotation_degrees.y = player.rotation - 180
+					
+				for id in neighbours_ids:
+					dirty_neighbours.append(id)
 				
 			else:
 				new_cell = current_cell
