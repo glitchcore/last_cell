@@ -5,13 +5,15 @@ var viewport_size = Vector2(0, 0)
 var rng
 var node_2d
 var mesh_instance_scale
+var mesh_instance
 
-func _init(_viewport_size, _rng, _node_2d, _mesh_instance_scale):
+func _init(_viewport_size, _rng, _node_2d, _mesh_instance):
 	cell_fn = load("res://cell_fn.gd").new()
 	viewport_size = _viewport_size
 	rng = _rng
 	node_2d = _node_2d
-	mesh_instance_scale = _mesh_instance_scale
+	mesh_instance_scale = _mesh_instance.scale
+	mesh_instance = _mesh_instance
 
 func init_cell():
 	return {
@@ -45,16 +47,19 @@ func draw_cell(cell, x, y):
 	
 	if cell.geometry == null:
 		var cell_mesh_instance = MeshInstance.new()
-		var cell_mesh = CubeMesh.new()
+		#var cell_mesh = CubeMesh.new()
+		var cell_mesh = SphereMesh.new()
 		
 		#set size
-		cell_mesh.set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
+		cell_mesh.set_radius(cell_size_x * size_this / 2)
+		cell_mesh.set_height(cell_size_x * size_this)
+		#cell_mesh.set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
 		cell_mesh_instance.set_mesh(cell_mesh)
 		
 		#replace
 		var x_position = mesh_instance_scale.x/cell_fn.X_SIZE * x + cell_size_x/2 - mesh_instance_scale.x/2
 		var y_position = mesh_instance_scale.y/cell_fn.Y_SIZE * y + cell_size_y/2 - mesh_instance_scale.y/2
-		cell_mesh_instance.set_translation(Vector3(x_position, 0, y_position))
+		cell_mesh_instance.set_translation(Vector3(x_position, cell_size_y/2, y_position))
 		
 		node_2d.add_child(cell_mesh_instance)
 		
@@ -73,7 +78,10 @@ func draw_cell(cell, x, y):
 		
 		return [cell_mesh_instance, label]
 	else:
-		cell.geometry[0].get_mesh().set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
+		cell.geometry[0].get_mesh().set_radius(cell_size_x * size_this / 2)
+		cell.geometry[0].get_mesh().set_height(cell_size_x * size_this)
+		#cell.geometry.get_mesh().set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
+		
 		if DRAW_LABELS:
 			cell.geometry[1].text = label_text
 		
