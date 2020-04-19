@@ -73,11 +73,13 @@ func conways_life(current_cell, neighbours):
 		"neighbours_count": neighbours_count
 	}
 
+const GLIDER = true
+
 func init_cell():
 	return {
 		"state": {
 			"cell_fn": FN_CONWAYS_LIFE,
-			"alive": rng.randf_range(-1.0, 1.0) > 0.0,
+			"alive": false if GLIDER else rng.randf_range(-1.0, 1.0) > 0.0,
 			"neighbours_count": 0,
 		},
 		"geometry": null,
@@ -105,6 +107,19 @@ func _ready():
 			col.append(cell)
 		
 		cells_state.append(col)
+		
+	if GLIDER:
+		cells_state[0][0].state.alive = false
+		cells_state[1][0].state.alive = true
+		cells_state[2][0].state.alive = false
+		
+		cells_state[0][1].state.alive = false
+		cells_state[1][1].state.alive = false
+		cells_state[2][1].state.alive = true
+		
+		cells_state[0][2].state.alive = true
+		cells_state[1][2].state.alive = true
+		cells_state[2][2].state.alive = true
 	
 	# draw grid
 	for x in range(X_SIZE):
@@ -136,7 +151,7 @@ func sort(dict):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	frame_count += 1
-	if frame_count % 10 != 0:
+	if frame_count % 1 != 0:
 		return
 	
 	var new_cells_state = []
