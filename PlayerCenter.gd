@@ -23,6 +23,7 @@ func _process(_delta):
 #	if Input.is_action_pressed("ui_right"):
 #		translate_object_local(Vector3(SPEED * delta, 0, 0))
 #	if Input.is_action_pressed("ui_up"):
+#		print("up")
 #		translate_object_local(Vector3(0, 0, -SPEED * delta))
 #	if Input.is_action_pressed("ui_down"):
 #		translate_object_local(Vector3(0, 0, SPEED * delta))

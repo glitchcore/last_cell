@@ -7,6 +7,7 @@ var conway
 var sphere_playground
 var player_node
 var plane_size
+var player
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -55,15 +56,9 @@ func _ready():
 			# )
 			
 			# update player
-			var player = sphere_playground.get_player(cells_state[x][y], x, y)
-			if player != null:
-				# set player position
-				player_node.translation = Vector3(
-					plane_size.x * (player.x - 0.5) / cell_fn.X_SIZE - plane_size.x/2,
-					0,
-					plane_size.y * (player.y - 0.5) / cell_fn.Y_SIZE - plane_size.y/2
-				)
-				player_node.rotation_degrees.y = player.rotation
+			var _player = sphere_playground.get_player(cells_state[x][y], x, y)
+			if _player != null:
+				player = _player
 	
 	# draw grid
 	for x in range(cell_fn.X_SIZE):
@@ -110,7 +105,9 @@ func _process(_delta):
 			
 			var new_cell_state = null
 			
-			if current_cell.dirty:
+			var is_player = (player != null and player.x == x and player.y == y)
+			
+			if current_cell.dirty or is_player:
 				# make a calculations
 				
 				var neighbours_ids = cell_fn.get_neighbours_id(x, y)
@@ -136,7 +133,8 @@ func _process(_delta):
 			
 			var new_cell = {}
 			
-			if new_cell_state != null and sort(new_cell_state).hash() != sort(current_cell.state).hash():
+			if (new_cell_state != null and \
+				sort(new_cell_state).hash() != sort(current_cell.state).hash()) or is_player:
 				new_cell = {
 					"state": new_cell_state,
 					"geometry": current_cell.geometry,
@@ -147,13 +145,14 @@ func _process(_delta):
 				new_cell.geometry = sphere_playground.draw_cell(new_cell, x, y)
 				
 				# update player
-				var player = sphere_playground.get_player(new_cell, x, y)
-				if player != null:
+				var _player = sphere_playground.get_player(new_cell, x, y)
+				if _player != null:
+					player = _player
 					# set player position
 					player_node.translation = Vector3(
-						plane_size.x * (player.x + 0.5) / cell_fn.X_SIZE,
+						plane_size.x * (player.x - 0.5) / cell_fn.X_SIZE - plane_size.x/2,
 						0,
-						plane_size.y * (player.y + 0.5) / cell_fn.Y_SIZE
+						plane_size.y * (player.y - 0.5) / cell_fn.Y_SIZE - plane_size.y/2
 					)
 					player_node.rotation_degrees.y = player.rotation
 				

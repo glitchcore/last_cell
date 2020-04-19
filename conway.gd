@@ -73,5 +73,5 @@ func update_cell(current_cell, neighbours):
 		"neighbours_count": neighbours_count
 	}
 	
-func get_player(current_cell, x, y):
+func get_player(_current_cell, _x, _y):
 	return null
