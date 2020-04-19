@@ -2,6 +2,7 @@ extends Spatial
 
 var node_2d
 var cells_state = []
+var rng
 
 const X_SIZE = 20
 const Y_SIZE = 20
@@ -9,25 +10,22 @@ const Y_SIZE = 20
 var viewport_size = Vector2(0, 0)
 
 func draw_cell(cell, x, y):
-	if cell.state:
-		if cell.geometry == null:
-			var label = Label.new()
-			label.text = "*"
-			label.rect_position = Vector2(
-				viewport_size.x * float(x + 0.5)/X_SIZE,
-				viewport_size.y * float(y + 0.5)/Y_SIZE
-			)
-			node_2d.add_child(label)
-			
-			return label
-	else:
-		if not cell.geometry == null:
-			cell.geometry.queue_free()
+	if cell.geometry == null:
+		var label = Label.new()
+		label.text = "#" if cell.alive else ""
+		label.rect_position = Vector2(
+			viewport_size.x * float(x + 0.5)/X_SIZE,
+			viewport_size.y * float(y + 0.5)/Y_SIZE
+		)
+		node_2d.add_child(label)
 		
-		return null
+		return label
+	else:
+		cell.geometry.text = "#" if cell.alive else ""
+		return cell.geometry
 
 func get_neighbours(state, x, y):
-	# get Fon-neumann 1 rank w circular
+	# get moore neighbourhood
 	return [
 		state[x + 1 if x + 1 < X_SIZE else 0][y],
 		state[x - 1 if x > 0 else X_SIZE - 1][y],
@@ -47,23 +45,32 @@ enum {FN_CONWAYS_LIFE}
 func conways_life(current_cell, neighbours):
 	var live_neighbours = []
 	for neighbour in neighbours:
-		if neighbour.state:
+		if neighbour.alive:
 			live_neighbours.append(neighbour)
 	
 	var neighbours_count = len(live_neighbours)
 	
 	var new_state = false
 	
-	if not current_cell.state and neighbours_count == 3 :
+	if not current_cell.alive and neighbours_count == 3 :
 		new_state = true
 	
-	if current_cell.state and (neighbours_count == 2 or neighbours_count == 3):
+	if current_cell.alive and (neighbours_count == 2 or neighbours_count == 3):
 		new_state = true
 	
 	return {
 		"cell_fn": FN_CONWAYS_LIFE,
-		"state": new_state,
-		"geometry": current_cell.geometry
+		"alive": new_state,
+		"geometry": current_cell.geometry,
+		"neighbours_count": neighbours_count
+	}
+
+func init_cell():
+	return {
+		"cell_fn": FN_CONWAYS_LIFE,
+		"alive": rng.randf_range(-1.0, 1.0) > 0.0,
+		"neighbours_count": 0,
+		"geometry": null
 	}
 	
 # Called when the node enters the scene tree for the first time.
@@ -72,18 +79,14 @@ func _ready():
 	
 	node_2d = get_node("Viewport/Node2D")
 	
-	var rng = RandomNumberGenerator.new()
+	rng = RandomNumberGenerator.new()
 	rng.randomize()
 	
 	for x in range(X_SIZE):
 		var col = []
 		for y in range(Y_SIZE):
 			# init cells state
-			var cell = {
-				"cell_fn": FN_CONWAYS_LIFE,
-				"state": rng.randf_range(-1.0, 1.0) > 0.0,
-				"geometry": null
-			}
+			var cell = init_cell()
 			
 			cell.geometry = draw_cell(cell, x, y)
 			
@@ -106,8 +109,14 @@ func _ready():
 		new_line.width = 2
 		node_2d.add_child(new_line)
 
+var frame_count = 0
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
+	frame_count += 1
+	if frame_count % 10 != 0:
+		return
+	
 	var new_cells_state = []
 
 	for x in range(X_SIZE):
