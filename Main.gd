@@ -9,7 +9,7 @@ const Y_SIZE = 20
 
 var viewport_size = Vector2(0, 0)
 
-func draw_cell(cell, x, y):
+func conway_draw_cell(cell, x, y):
 	var label_text = "#" + str(cell.calc_count) + "#" if cell.state.alive else " " + str(cell.calc_count) + " "
 	if cell.geometry == null:
 		var label = Label.new()
@@ -49,7 +49,7 @@ func get_neighbours(state, ids):
 	
 	return neighbours
 
-enum {FN_CONWAYS_LIFE}
+enum {FN_CONWAYS_LIFE, FN_SPHERE_PLAYGROUND}
 
 func conways_life(current_cell, neighbours):
 	var live_neighbours = []
@@ -75,7 +75,7 @@ func conways_life(current_cell, neighbours):
 
 const GLIDER = true
 
-func init_cell():
+func conway_init_cell():
 	return {
 		"state": {
 			"cell_fn": FN_CONWAYS_LIFE,
@@ -86,7 +86,48 @@ func init_cell():
 		"calc_count": 0,
 		"dirty": true
 	}
+
+func sphere_playground_init_cell():
+	return {
+		"state": {
+			"cell_fn": FN_SPHERE_PLAYGROUND,
+			"sphere_mass": 0,
+			"rotate": 0,
+			"force_value": 0,
+			"force": [0, 0, 0, 0, 0, 0, 0, 0],
+			"is_player": false
+		},
+		
+		"geometry": null,
+		"calc_count": 0,
+		"dirty": true
+	}
+
+func sphere_playground_draw_cell(cell, x, y):
+	var label_text = \
+		"m:" + str(cell.state.sphere_mass) + "\n" + \
+		"r:" + str(cell.state.rotate) + "\n" + \
+		"f:" + str(cell.state.force_value) + \
+		("p" if cell.state.is_player else "")
 	
+	if cell.geometry == null:
+		var label = Label.new()
+		label.text = label_text
+		label.rect_position = Vector2(
+			viewport_size.x * float(x + 0.0)/X_SIZE,
+			viewport_size.y * float(y + 0.0)/Y_SIZE
+		)
+		node_2d.add_child(label)
+		
+		return label
+	else:
+		cell.geometry.text = label_text
+		return cell.geometry
+
+func sphere_playground(current_cell, neighbours):
+	return current_cell
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	viewport_size = get_node("Viewport").size
@@ -100,26 +141,13 @@ func _ready():
 		var col = []
 		for y in range(Y_SIZE):
 			# init cells state
-			var cell = init_cell()
-			
-			cell.geometry = draw_cell(cell, x, y)
+			# var cell = conway_init_cell()
+			var cell = sphere_playground_init_cell()
+			cell.geometry = sphere_playground_draw_cell(cell, x, y)
 			
 			col.append(cell)
 		
 		cells_state.append(col)
-		
-	if GLIDER:
-		cells_state[0][0].state.alive = false
-		cells_state[1][0].state.alive = true
-		cells_state[2][0].state.alive = false
-		
-		cells_state[0][1].state.alive = false
-		cells_state[1][1].state.alive = false
-		cells_state[2][1].state.alive = true
-		
-		cells_state[0][2].state.alive = true
-		cells_state[1][2].state.alive = true
-		cells_state[2][2].state.alive = true
 	
 	# draw grid
 	for x in range(X_SIZE):
@@ -150,6 +178,7 @@ func sort(dict):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
+	# optional skip frames
 	frame_count += 1
 	if frame_count % 1 != 0:
 		return
@@ -176,6 +205,12 @@ func _process(_delta):
 							current_cell.state,
 							get_neighbours(cells_state, neighbours_ids)
 						)
+					
+					FN_SPHERE_PLAYGROUND:
+						new_cell_state = sphere_playground(
+							current_cell.state,
+							get_neighbours(cells_state, neighbours_ids)
+						)
 					_:
 						pass
 				
@@ -185,16 +220,6 @@ func _process(_delta):
 			
 			var new_cell = {}
 			
-			var a = {
-				"foo": 1,
-				"bar": 2
-			}
-			
-			var b = {
-				"foo": 1,
-				"bar": 2
-			}
-			
 			if new_cell_state != null and sort(new_cell_state).hash() != sort(current_cell.state).hash():
 				new_cell = {
 					"state": new_cell_state,
@@ -203,7 +228,7 @@ func _process(_delta):
 					"dirty": true
 				}
 				
-				new_cell.geometry = draw_cell(new_cell, x, y)
+				new_cell.geometry = sphere_playground_draw_cell(new_cell, x, y)
 				
 			else:
 				new_cell = current_cell
