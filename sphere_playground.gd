@@ -4,12 +4,14 @@ var cell_fn
 var viewport_size = Vector2(0, 0)
 var rng
 var node_2d
+var mesh_instance_scale
 
-func _init(_viewport_size, _rng, _node_2d):
+func _init(_viewport_size, _rng, _node_2d, _mesh_instance_scale):
 	cell_fn = load("res://cell_fn.gd").new()
 	viewport_size = _viewport_size
 	rng = _rng
 	node_2d = _node_2d
+	mesh_instance_scale = _mesh_instance_scale
 
 func init_cell():
 	return {
@@ -28,27 +30,36 @@ func init_state(cells_state):
 	return cells_state
 	
 func draw_cell(cell, x, y):
-	var label_text = \
-		"m:" + str(cell.state.sphere_mass) + "\n" + \
-		"r:" + str(cell.state.rotate) + "\n" + \
-		"f:" + str(cell.state.force_value) + " " + \
-		("p" if cell.state.is_player else "") + \
-		str(cell.calc_count)
-	
-	if cell.geometry == null:
-		var label = Label.new()
-		label.text = label_text
-		label.rect_position = Vector2(
-			viewport_size.x * float(x + 0.0)/cell_fn.X_SIZE,
-			viewport_size.y * float(y + 0.0)/cell_fn.Y_SIZE
-		)
-		node_2d.add_child(label)
+#	var label_text = \
+#		"m:" + str(cell.state.sphere_mass) + "\n" + \
+#		"r:" + str(cell.state.rotate) + "\n" + \
+#		"f:" + str(cell.state.force_value) + " " + \
+#		("p" if cell.state.is_player else "") + \
+#		str(cell.calc_count)
 		
-		return label
+	var size_this = float(cell.state.sphere_mass/100.0)
+	var cell_size_x = mesh_instance_scale.x/cell_fn.X_SIZE
+	var cell_size_y = mesh_instance_scale.y/cell_fn.Y_SIZE
+	if cell.geometry == null:
+		var cell_mesh_instance = MeshInstance.new()
+		var cell_mesh = CubeMesh.new()
+		
+		#set size
+		cell_mesh.set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
+		cell_mesh_instance.set_mesh(cell_mesh)
+		
+		#replace
+		var x_position = mesh_instance_scale.x/cell_fn.X_SIZE * x + cell_size_x/2 - mesh_instance_scale.x/2
+		var y_position = mesh_instance_scale.y/cell_fn.Y_SIZE * y + cell_size_y/2 - mesh_instance_scale.y/2
+		cell_mesh_instance.set_translation(Vector3(x_position, 0, y_position))
+		
+		node_2d.add_child(cell_mesh_instance)
+		return cell_mesh_instance
 	else:
-		cell.geometry.text = label_text
+		cell.geometry.get_mesh().set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
 		return cell.geometry
-
+		
+		
 func handle_ui(state):
 	var new_state = state
 	
