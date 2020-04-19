@@ -152,11 +152,11 @@ func _process(_delta):
 					player = _player
 					# set player position
 					player_node.translation = Vector3(
-						plane_size.x * (player.x - 0.5) / cell_fn.X_SIZE - plane_size.x/2,
+						plane_size.x * (player.x + 0.5) / cell_fn.X_SIZE - plane_size.x/2,
 						0,
-						plane_size.y * (player.y - 0.5) / cell_fn.Y_SIZE - plane_size.y/2
+						plane_size.y * (player.y + 0.5) / cell_fn.Y_SIZE - plane_size.y/2
 					)
-					player_node.rotation_degrees.y = player.rotation - 180
+					player_node.rotation_degrees.y = player.rotation
 				
 				if need_update:
 					assert(neighbours_ids != null)

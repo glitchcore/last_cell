@@ -30,16 +30,17 @@ func init_state(cells_state):
 	return cells_state
 	
 func draw_cell(cell, x, y):
-#	var label_text = \
-#		"m:" + str(cell.state.sphere_mass) + "\n" + \
-#		"r:" + str(cell.state.rotate) + "\n" + \
-#		"f:" + str(cell.state.force_value) + " " + \
-#		("p" if cell.state.is_player else "") + \
-#		str(cell.calc_count)
+	var label_text = \
+		"m:" + str(cell.state.sphere_mass) + "\n" + \
+		"r:" + str(cell.state.rotate) + "\n" + \
+		"f:" + str(cell.state.force_value) + " " + \
+		("p" if cell.state.is_player else "") + \
+		str(cell.calc_count)
 		
 	var size_this = float(cell.state.sphere_mass/100.0)
 	var cell_size_x = mesh_instance_scale.x/cell_fn.X_SIZE
 	var cell_size_y = mesh_instance_scale.y/cell_fn.Y_SIZE
+	
 	if cell.geometry == null:
 		var cell_mesh_instance = MeshInstance.new()
 		var cell_mesh = CubeMesh.new()
@@ -54,9 +55,20 @@ func draw_cell(cell, x, y):
 		cell_mesh_instance.set_translation(Vector3(x_position, 0, y_position))
 		
 		node_2d.add_child(cell_mesh_instance)
-		return cell_mesh_instance
+		
+		var label = Label.new()
+		label.text = label_text
+		label.rect_position = Vector2(
+			viewport_size.x * float(x + 0.0)/cell_fn.X_SIZE,
+			viewport_size.y * float(y + 0.0)/cell_fn.Y_SIZE
+		)
+		node_2d.add_child(label)
+		
+		return [cell_mesh_instance, label]
 	else:
-		cell.geometry.get_mesh().set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
+		cell.geometry[0].get_mesh().set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
+		cell.geometry[1].text = label_text
+		
 		return cell.geometry
 		
 		
