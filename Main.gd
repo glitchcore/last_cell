@@ -24,7 +24,7 @@ func _ready():
 	var rng = RandomNumberGenerator.new()
 	rng.randomize()
 	
-	conway = load("res://conway.gd").new(viewport_size, rng, node_2d)
+	conway = load("res://conway.gd").new(viewport_size, rng, node_2d, get_node("MeshInstance").scale)
 	sphere_playground = load("res://sphere_playground.gd").new(viewport_size, rng, node_2d)
 	
 	for _x in range(cell_fn.X_SIZE):
@@ -91,7 +91,7 @@ func sort(dict):
 func _process(_delta):
 	# optional skip frames
 	frame_count += 1
-	if frame_count % 1 != 0:
+	if frame_count % 10 != 0:
 		return
 	
 	var new_cells_state = []
