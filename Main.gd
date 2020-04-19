@@ -111,8 +111,6 @@ func _process(_delta):
 			
 			if current_cell.dirty or is_player:
 				# make a calculations
-				if current_cell.dirty:
-					print("update dirty ", x, " ", y)
 				
 				neighbours_ids = cell_fn.get_neighbours_id(x, y)
 				
