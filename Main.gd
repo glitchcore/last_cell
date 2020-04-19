@@ -10,9 +10,10 @@ const Y_SIZE = 20
 var viewport_size = Vector2(0, 0)
 
 func draw_cell(cell, x, y):
+	var label_text = "#" + str(cell.calc_count) + "#" if cell.state.alive else " " + str(cell.calc_count) + " "
 	if cell.geometry == null:
 		var label = Label.new()
-		label.text = "#" if cell.alive else ""
+		label.text = label_text
 		label.rect_position = Vector2(
 			viewport_size.x * float(x + 0.5)/X_SIZE,
 			viewport_size.y * float(y + 0.5)/Y_SIZE
@@ -21,24 +22,32 @@ func draw_cell(cell, x, y):
 		
 		return label
 	else:
-		cell.geometry.text = "#" if cell.alive else ""
+		cell.geometry.text = label_text
 		return cell.geometry
-
-func get_neighbours(state, x, y):
-	# get moore neighbourhood
+	
+func get_neighbours_id(x, y):
 	return [
-		state[x + 1 if x + 1 < X_SIZE else 0][y],
-		state[x - 1 if x > 0 else X_SIZE - 1][y],
+		[x + 1 if x + 1 < X_SIZE else 0, y],
+		[x - 1 if x > 0 else X_SIZE - 1, y],
 		
-		state[x][y + 1 if y + 1 < Y_SIZE else 0],
-		state[x][y - 1 if y > 0 else Y_SIZE - 1],
+		[x, y + 1 if y + 1 < Y_SIZE else 0],
+		[x, y - 1 if y > 0 else Y_SIZE - 1],
 		
-		state[x + 1 if x + 1 < X_SIZE else 0][y + 1 if y + 1 < Y_SIZE else 0],
-		state[x + 1 if x + 1 < X_SIZE else 0][y - 1 if y > 0 else Y_SIZE - 1],
+		[x + 1 if x + 1 < X_SIZE else 0, y + 1 if y + 1 < Y_SIZE else 0],
+		[x + 1 if x + 1 < X_SIZE else 0, y - 1 if y > 0 else Y_SIZE - 1],
 		
-		state[x - 1 if x > 0 else X_SIZE - 1][y + 1 if y + 1 < Y_SIZE else 0],
-		state[x - 1 if x > 0 else X_SIZE - 1][y - 1 if y > 0 else Y_SIZE - 1]
+		[x - 1 if x > 0 else X_SIZE - 1, y + 1 if y + 1 < Y_SIZE else 0],
+		[x - 1 if x > 0 else X_SIZE - 1, y - 1 if y > 0 else Y_SIZE - 1]
 	]
+
+func get_neighbours(state, ids):
+	var neighbours = []
+	
+	# get moore neighbourhood
+	for id in ids:
+		neighbours.append(state[id[0]][id[1]].state)
+	
+	return neighbours
 
 enum {FN_CONWAYS_LIFE}
 
@@ -61,16 +70,19 @@ func conways_life(current_cell, neighbours):
 	return {
 		"cell_fn": FN_CONWAYS_LIFE,
 		"alive": new_state,
-		"geometry": current_cell.geometry,
 		"neighbours_count": neighbours_count
 	}
 
 func init_cell():
 	return {
-		"cell_fn": FN_CONWAYS_LIFE,
-		"alive": rng.randf_range(-1.0, 1.0) > 0.0,
-		"neighbours_count": 0,
-		"geometry": null
+		"state": {
+			"cell_fn": FN_CONWAYS_LIFE,
+			"alive": rng.randf_range(-1.0, 1.0) > 0.0,
+			"neighbours_count": 0,
+		},
+		"geometry": null,
+		"calc_count": 0,
+		"dirty": true
 	}
 	
 # Called when the node enters the scene tree for the first time.
@@ -111,6 +123,16 @@ func _ready():
 
 var frame_count = 0
 
+func sort(dict):
+	var sorted_dict = {}
+	var keys = dict.keys()
+	keys.sort()
+	
+	for key in keys:
+		sorted_dict[key] = dict[key]
+	
+	return sorted_dict
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	frame_count += 1
@@ -118,32 +140,65 @@ func _process(_delta):
 		return
 	
 	var new_cells_state = []
+	var dirty_neighbours = []
 
 	for x in range(X_SIZE):
 		var col = []
 		for y in range(Y_SIZE):
 			# init cells state
 			var current_cell = cells_state[x][y]
-
-			var new_cell = null
-
-			match current_cell.cell_fn:
-				FN_CONWAYS_LIFE:
-					new_cell = conways_life(
-						current_cell,
-						get_neighbours(cells_state, x, y)
-					)
-					# print(x, y, "new cell", new_cell)
-				_:
-					new_cell = null
 			
-			if not new_cell == current_cell:
-				new_cell.geometry = draw_cell(new_cell, x, y)
+			var new_cell_state = null
 			
-			# new_cell.geometry = null
+			if current_cell.dirty:
+				# make a calculations
 				
+				var neighbours_ids = get_neighbours_id(x, y)
+				
+				match current_cell.state.cell_fn:
+					FN_CONWAYS_LIFE:
+						new_cell_state = conways_life(
+							current_cell.state,
+							get_neighbours(cells_state, neighbours_ids)
+						)
+					_:
+						pass
+				
+				if new_cell_state != current_cell.state:
+					for id in neighbours_ids:
+						dirty_neighbours.append(id)
+			
+			var new_cell = {}
+			
+			var a = {
+				"foo": 1,
+				"bar": 2
+			}
+			
+			var b = {
+				"foo": 1,
+				"bar": 2
+			}
+			
+			if new_cell_state != null and sort(new_cell_state).hash() != sort(current_cell.state).hash():
+				new_cell = {
+					"state": new_cell_state,
+					"geometry": current_cell.geometry,
+					"calc_count": current_cell.calc_count + 1,
+					"dirty": true
+				}
+				
+				new_cell.geometry = draw_cell(new_cell, x, y)
+				
+			else:
+				new_cell = current_cell
+				new_cell.dirty = false
+			
 			col.append(new_cell)
 
 		new_cells_state.append(col)
 		
 	cells_state = new_cells_state
+	
+	for id in dirty_neighbours:
+		cells_state[id[0]][id[1]].dirty = true
