@@ -28,11 +28,11 @@ func _ready():
 				"geometry": null,
 				"calc_count": 0,
 				"dirty": true,
-				# "state": sphere_playground.init_cell()
-				"state": conway.init_cell()
+				"state": sphere_playground.init_cell()
+				# "state": conway.init_cell()
 			}
-			# cell.geometry = sphere_playground.draw_cell(cell, x, y)
-			cell.geometry = conway.draw_cell(cell, x, y)
+			cell.geometry = sphere_playground.draw_cell(cell, x, y)
+			# cell.geometry = conway.draw_cell(cell, x, y)
 			
 			col.append(cell)
 		
