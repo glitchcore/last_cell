@@ -36,7 +36,7 @@ func _input(event):
 #			deg2rad(-80), deg2rad(0)
 #		)
 		
-		# rotation.y -= event.relative.x * MOUSE_SPEED
+#		rotation.y -= event.relative.x * MOUSE_SPEED
 	
 #
 #	if Input.is_action_pressed("ui_right"):

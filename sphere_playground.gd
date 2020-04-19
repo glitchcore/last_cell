@@ -14,7 +14,7 @@ func _init(_viewport_size, _rng, _node_2d):
 func init_cell():
 	return {
 		"cell_fn": cell_fn.FN_SPHERE_PLAYGROUND,
-		"sphere_mass": 0,
+		"sphere_mass": 0, # 0..100
 		"rotate": 0,
 		"force_value": 0,
 		"force": [0, 0, 0, 0], # top right down left
@@ -79,9 +79,19 @@ func handle_sphere(state, neighbours):
 	new_state.sphere_mass += neighbours[1].force[3]
 	new_state.sphere_mass += neighbours[2].force[0]
 	new_state.sphere_mass += neighbours[3].force[1]
-			
+	
 	return new_state
 
+func handle_free(state, neighbours):
+	var new_state = state
+	
+	# handle external sphere
+	new_state.sphere_mass += neighbours[0].force[2]
+	new_state.sphere_mass += neighbours[1].force[3]
+	new_state.sphere_mass += neighbours[2].force[0]
+	new_state.sphere_mass += neighbours[3].force[1]
+	
+	return new_state
 
 func update_cell(old_state, neighbours):
 	var state = old_state
@@ -93,14 +103,17 @@ func update_cell(old_state, neighbours):
 	
 	# fet Von-neumann 1 rank
 	var vonneuman_neighbours = [
-		neighbours[1],
 		neighbours[3],
 		neighbours[5],
-		neighbours[7]
+		neighbours[7],
+		neighbours[1]
 	]
 	
 	if state.sphere_mass > 0:
 		state = handle_sphere(state, vonneuman_neighbours)
+	
+	if state.sphere_mass == 0:
+		state = handle_free(state, vonneuman_neighbours)
 	
 	return state
 
