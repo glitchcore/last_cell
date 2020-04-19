@@ -18,6 +18,22 @@ func init_cell():
 		"alive": false if cell_fn.GLIDER else rng.randf_range(-1.0, 1.0) > 0.0,
 		"neighbours_count": 0,
 	}
+	
+func init_state(cells_state):
+	if cell_fn.GLIDER:
+		cells_state[0][0].state.alive = false
+		cells_state[1][0].state.alive = true
+		cells_state[2][0].state.alive = false
+		
+		cells_state[0][1].state.alive = false
+		cells_state[1][1].state.alive = false
+		cells_state[2][1].state.alive = true
+		
+		cells_state[0][2].state.alive = true
+		cells_state[1][2].state.alive = true
+		cells_state[2][2].state.alive = true
+	
+	return cells_state
 
 func draw_cell(cell, x, y):
 	var label_text = "#" + str(cell.calc_count) + "#" if cell.state.alive else " " + str(cell.calc_count) + " "
@@ -57,3 +73,5 @@ func update_cell(current_cell, neighbours):
 		"neighbours_count": neighbours_count
 	}
 	
+func get_player(current_cell, x, y):
+	return null

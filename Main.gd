@@ -5,14 +5,20 @@ var cells_state = []
 var cell_fn
 var conway
 var sphere_playground
+var player_node
+var plane_size
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	cell_fn = load("res://cell_fn.gd").new()
 	
 	var viewport_size = get_node("Viewport").size
+	plane_size = get_node("MeshInstance").scale
+	# plane_size = {"x": plane_size.x, "y": plane_size.z}
 	
 	var node_2d = get_node("Viewport/Node2D")
+	
+	player_node = get_node("PlayerCenter")
 	
 	var rng = RandomNumberGenerator.new()
 	rng.randomize()
@@ -20,9 +26,9 @@ func _ready():
 	conway = load("res://conway.gd").new(viewport_size, rng, node_2d)
 	sphere_playground = load("res://sphere_playground.gd").new(viewport_size, rng, node_2d)
 	
-	for x in range(cell_fn.X_SIZE):
+	for _x in range(cell_fn.X_SIZE):
 		var col = []
-		for y in range(cell_fn.Y_SIZE):
+		for _y in range(cell_fn.Y_SIZE):
 			# init cells state
 			var cell = {
 				"geometry": null,
@@ -31,25 +37,33 @@ func _ready():
 				"state": sphere_playground.init_cell()
 				# "state": conway.init_cell()
 			}
-			cell.geometry = sphere_playground.draw_cell(cell, x, y)
-			# cell.geometry = conway.draw_cell(cell, x, y)
 			
 			col.append(cell)
 		
 		cells_state.append(col)
-		
-	if cell_fn.GLIDER:
-		cells_state[0][0].state.alive = false
-		cells_state[1][0].state.alive = true
-		cells_state[2][0].state.alive = false
-		
-		cells_state[0][1].state.alive = false
-		cells_state[1][1].state.alive = false
-		cells_state[2][1].state.alive = true
-		
-		cells_state[0][2].state.alive = true
-		cells_state[1][2].state.alive = true
-		cells_state[2][2].state.alive = true
+	
+	cells_state = sphere_playground.init_state(cells_state)
+	# cells_state = conway.init_state(cells_state)
+	
+	for x in range(cell_fn.X_SIZE):
+		for y in range(cell_fn.Y_SIZE):
+			cells_state[x][y].geometry = sphere_playground.draw_cell(
+				cells_state[x][y], x, y
+			)
+			# cells_state[x][y].geometry = conway.draw_cell(
+			# 	cell[x][y], x, y
+			# )
+			
+			# update player
+			var player = sphere_playground.get_player(cells_state[x][y], x, y)
+			if player != null:
+				# set player position
+				player_node.translation = Vector3(
+					plane_size.x * (player.x - 0.5) / cell_fn.X_SIZE - plane_size.x/2,
+					0,
+					plane_size.y * (player.y - 0.5) / cell_fn.Y_SIZE - plane_size.y/2
+				)
+				player_node.rotation_degrees.y = player.rotation
 	
 	# draw grid
 	for x in range(cell_fn.X_SIZE):
@@ -130,7 +144,18 @@ func _process(_delta):
 					"dirty": true
 				}
 				
-				new_cell.geometry = conway.draw_cell(new_cell, x, y)
+				new_cell.geometry = sphere_playground.draw_cell(new_cell, x, y)
+				
+				# update player
+				var player = sphere_playground.get_player(new_cell, x, y)
+				if player != null:
+					# set player position
+					player_node.translation = Vector3(
+						plane_size.x * (player.x + 0.5) / cell_fn.X_SIZE,
+						0,
+						plane_size.y * (player.y + 0.5) / cell_fn.Y_SIZE
+					)
+					player_node.rotation_degrees.y = player.rotation
 				
 			else:
 				new_cell = current_cell

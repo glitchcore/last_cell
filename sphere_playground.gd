@@ -21,11 +21,18 @@ func init_cell():
 		"is_player": false
 	}
 
+func init_state(cells_state):
+	cells_state[cell_fn.X_SIZE/2][cell_fn.Y_SIZE/2].state.is_player = true
+	cells_state[cell_fn.X_SIZE/2][cell_fn.Y_SIZE/2].state.sphere_mass = 100
+	cells_state[cell_fn.X_SIZE/2][cell_fn.Y_SIZE/2].dirty = true
+	
+	return cells_state
+	
 func draw_cell(cell, x, y):
 	var label_text = \
 		"m:" + str(cell.state.sphere_mass) + "\n" + \
 		"r:" + str(cell.state.rotate) + "\n" + \
-		"f:" + str(cell.state.force_value) + "\n" + \
+		"f:" + str(cell.state.force_value) + " " + \
 		("p" if cell.state.is_player else "")
 	
 	if cell.geometry == null:
@@ -42,5 +49,15 @@ func draw_cell(cell, x, y):
 		cell.geometry.text = label_text
 		return cell.geometry
 
-func update_cell(current_cell, neighbours):
+func update_cell(current_cell, _neighbours):
 	return current_cell
+
+func get_player(current_cell, x, y):
+	if current_cell.state.is_player:
+		return {
+			"rotation": current_cell.state.rotate,
+			"x": x,
+			"y": y
+		}
+	else:
+		return null
