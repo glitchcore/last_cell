@@ -24,9 +24,16 @@ func _ready():
 		var col = []
 		for y in range(cell_fn.Y_SIZE):
 			# init cells state
-			var cell = conway.init_cell()
-			# var cell = sphere_playground_init_cell()
-			cell.geometry = conway.draw_cell(cell, x, y)
+			
+			# cell.geometry = conway.draw_cell(cell, x, y)
+			var cell = {
+				"geometry": null,
+				"calc_count": 0,
+				"dirty": true,
+				"state": sphere_playground.init_cell()
+				# "state": conway.init_cell()
+			}
+			cell.geometry = sphere_playground.draw_cell(cell, x, y)
 			
 			col.append(cell)
 		

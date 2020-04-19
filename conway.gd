@@ -14,14 +14,9 @@ func _init(_viewport_size, _rng, _node_2d):
 
 func init_cell():
 	return {
-		"state": {
-			"cell_fn": cell_fn.FN_CONWAYS_LIFE,
-			"alive": false if cell_fn.GLIDER else rng.randf_range(-1.0, 1.0) > 0.0,
-			"neighbours_count": 0,
-		},
-		"geometry": null,
-		"calc_count": 0,
-		"dirty": true
+		"cell_fn": cell_fn.FN_CONWAYS_LIFE,
+		"alive": false if cell_fn.GLIDER else rng.randf_range(-1.0, 1.0) > 0.0,
+		"neighbours_count": 0,
 	}
 
 func draw_cell(cell, x, y):

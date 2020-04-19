@@ -1,37 +1,31 @@
 extends Node
 
-onready var cell_fn = load("res://cell_fn.gd")
-
+var cell_fn
 var viewport_size = Vector2(0, 0)
 var rng
 var node_2d
 
 func _init(_viewport_size, _rng, _node_2d):
+	cell_fn = load("res://cell_fn.gd").new()
 	viewport_size = _viewport_size
 	rng = _rng
 	node_2d = _node_2d
 
 func init_cell():
 	return {
-		"state": {
-			"cell_fn": cell_fn.FN_SPHERE_PLAYGROUND,
-			"sphere_mass": 0,
-			"rotate": 0,
-			"force_value": 0,
-			"force": [0, 0, 0, 0, 0, 0, 0, 0],
-			"is_player": false
-		},
-		
-		"geometry": null,
-		"calc_count": 0,
-		"dirty": true
+		"cell_fn": cell_fn.FN_SPHERE_PLAYGROUND,
+		"sphere_mass": 0,
+		"rotate": 0,
+		"force_value": 0,
+		"force": [0, 0, 0, 0, 0, 0, 0, 0],
+		"is_player": false
 	}
 
 func draw_cell(cell, x, y):
 	var label_text = \
 		"m:" + str(cell.state.sphere_mass) + "\n" + \
 		"r:" + str(cell.state.rotate) + "\n" + \
-		"f:" + str(cell.state.force_value) + \
+		"f:" + str(cell.state.force_value) + "\n" + \
 		("p" if cell.state.is_player else "")
 	
 	if cell.geometry == null:
