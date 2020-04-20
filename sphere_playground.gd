@@ -104,22 +104,22 @@ func update_cell(state, neighbours, input):
 	
 	if input.up:
 		input_force_direction = 1
-		force_value = 1
+		force_value = 5
 	if input.down:
 		input_force_direction = 3
-		force_value = 1
+		force_value = 5
 	if input.left:
 		input_force_direction = 2
-		force_value = 1
+		force_value = 5
 	if input.right:
 		input_force_direction = 0
-		force_value = 1
+		force_value = 5
 	
 	var force_mat = [2, 3, 0, 1]
 	
 	# calc is_player and sphere_mass
 	if state.is_player:
-		if force_value > 0 and state.sphere_mass == 1:
+		if force_value > 0 and state.sphere_mass == force_value:
 			new_state.is_player = false
 		else:
 			new_state.is_player = true
@@ -144,7 +144,7 @@ func update_cell(state, neighbours, input):
 			else:
 				neighbour_force_value = 0
 			
-			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass == 1:
+			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass == neighbour_force_value:
 				new_state.is_player = true
 			
 			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass > 0:
