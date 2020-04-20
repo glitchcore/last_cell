@@ -164,10 +164,26 @@ func _process(_delta):
 				if _player != null:
 					player = _player
 					# set player position
+					
+					var a_x = cells_state[player.x][player.y].state.sphere_mass * player.x
+					var a_y = cells_state[player.x][player.y].state.sphere_mass * player.y
+					var summ_mass = cells_state[player.x][player.y].state.sphere_mass
+					
+					for id in neighbours_ids:
+						var mass = cells_state[id[0]][id[1]].state.sphere_mass
+						
+						a_x += id[0] * mass
+						a_y += id[1] * mass
+						
+						summ_mass += mass
+					
+					var player_x = float(a_x) / summ_mass
+					var player_y = float(a_y) / summ_mass
+					
 					player_node.translation = Vector3(
-						plane_size.x * (player.x + 0.5) / cell_fn.X_SIZE - plane_size.x/2,
+						plane_size.x * (0.5 + player_x) / cell_fn.X_SIZE - plane_size.x/2,
 						0,
-						plane_size.y * (player.y + 0.5) / cell_fn.Y_SIZE - plane_size.y/2
+						plane_size.y * (0.5 + player_y) / cell_fn.Y_SIZE - plane_size.y/2
 					)
 					player_node.rotation_degrees.y = player.rotation
 				
