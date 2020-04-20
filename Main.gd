@@ -96,6 +96,20 @@ func _process(_delta):
 	
 	var new_cells_state = []
 	var dirty_neighbours = []
+	
+	var input = {
+		"up": Input.is_action_pressed("ui_up"),
+		"down": Input.is_action_pressed("ui_down"),
+		"left": Input.is_action_pressed("ui_left"),
+		"right":  Input.is_action_pressed("ui_right") 
+	}
+	
+	var no_input = {"up": false, "down": false, "left": false, "right": false}
+	
+	if player != null:
+		if sort(input).hash() != sort(no_input).hash():
+			for id in cell_fn.get_neighbours_id(player.x, player.y):
+				cells_state[id[0]][id[1]].dirty = true
 
 	for x in range(cell_fn.X_SIZE):
 		var col = []
@@ -124,7 +138,8 @@ func _process(_delta):
 					cell_fn.FN_SPHERE_PLAYGROUND:
 						new_cell_state = sphere_playground.update_cell(
 							current_cell.state.duplicate(),
-							cell_fn.get_neighbours(cells_state, neighbours_ids)
+							cell_fn.get_neighbours(cells_state, neighbours_ids),
+							input
 						)
 					_:
 						pass

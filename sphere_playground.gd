@@ -38,8 +38,8 @@ func draw_cell(cell, x, y):
 		"m:" + str(cell.state.sphere_mass) + "\n" + \
 		"r:" + str(cell.state.rotate) + "\n" + \
 		"f:" + str(cell.state.force_value) + " " + \
-		("p" if cell.state.is_player else "") + \
 		str(cell.calc_count)
+		# ("p" if cell.state.is_player else "") + \
 		
 	var size_this = float(cell.state.sphere_mass/100.0)
 	var cell_size_x = mesh_instance_scale.x/cell_fn.X_SIZE
@@ -86,65 +86,9 @@ func draw_cell(cell, x, y):
 			cell.geometry[1].text = label_text
 		
 		return cell.geometry
-		
 
-func handle_sphere(state, new_state, neighbours):
-	var force_direction = 0
-	var force_value = 0
-	
-	if state.is_player:
-		if Input.is_action_pressed("ui_up"):
-			force_direction = (int((state.rotate - 45)/90) + 1) % 4
-			force_value = 1
-		if Input.is_action_pressed("ui_down"):
-			force_direction = (int((state.rotate - 45)/90) + 3) % 4
-			force_value = 1
-		if Input.is_action_pressed("ui_left"):
-			force_direction = (int((state.rotate - 45)/90) + 2) % 4
-			force_value = 1
-		if Input.is_action_pressed("ui_right"):
-			force_direction = (int((state.rotate - 45)/90) + 0) % 4
-			force_value = 1
-		
-	new_state.force_value = force_value
-	
-	var next_cell = neighbours[force_direction]
-	
-	new_state.force = [0, 0, 0, 0]
-	new_state.force[force_direction] = state.force_value
-	
-	if state.force_value > 0:
-		# if next_cell is empty or true type
-		if next_cell.sphere_mass < 0 or true:
-			new_state.sphere_mass = state.sphere_mass - state.force_value
-			
-	if state.sphere_mass == 1 and state.force_value > 0:
-		new_state.is_player = false
-		new_state.force = [0, 0, 0, 0]
-	
-	# handle external sphere
-	new_state.sphere_mass += neighbours[0].force[2]
-	new_state.sphere_mass += neighbours[1].force[3]
-	new_state.sphere_mass += neighbours[2].force[0]
-	new_state.sphere_mass += neighbours[3].force[1]
-	
-	for neighbour in neighbours:
-		if neighbour.sphere_mass == 1:
-			print("king is dead I'm new king!")
-			new_state.is_player = true
-	
-	return new_state
 
-func handle_void(state, new_state, neighbours):
-	# handle external sphere
-	new_state.sphere_mass += neighbours[0].force[2]
-	new_state.sphere_mass += neighbours[1].force[3]
-	new_state.sphere_mass += neighbours[2].force[0]
-	new_state.sphere_mass += neighbours[3].force[1]
-	
-	return new_state
-
-func update_cell(state, neighbours):
+func update_cell(state, neighbours, input):
 	var new_state = state
 	
 	# fet Von-neumann 1 rank
@@ -155,11 +99,56 @@ func update_cell(state, neighbours):
 		neighbours[1]
 	]
 	
-	if state.sphere_mass > 0:
-		new_state = handle_sphere(state, new_state, vonneuman_neighbours)
+	var input_force_direction = 0
+	var force_value = 0
 	
-	if state.sphere_mass == 0:
-		new_state = handle_void(state, new_state, vonneuman_neighbours)
+	if input.up:
+		input_force_direction = 1
+		force_value = 1
+	if input.down:
+		input_force_direction = 3
+		force_value = 1
+	if input.left:
+		input_force_direction = 2
+		force_value = 1
+	if input.right:
+		input_force_direction = 0
+		force_value = 1
+	
+	var force_mat = [2, 3, 0, 1]
+	
+	# calc is_player and sphere_mass
+	if state.is_player:
+		if force_value > 0 and state.sphere_mass == 1:
+			new_state.is_player = false
+		else:
+			new_state.is_player = true
+			
+		if force_value > 0 and state.sphere_mass > 0:
+			new_state.sphere_mass = state.sphere_mass - force_value
+		else:
+			new_state.sphere_mass = state.sphere_mass
+		
+	else:
+		new_state.is_player = false
+		new_state.sphere_mass = state.sphere_mass
+		
+		for n in range(len(vonneuman_neighbours)):
+			var neighbour = vonneuman_neighbours[n]
+			
+			var force_direction = (int((neighbour.rotate - 45)/90) + input_force_direction) % 4
+			
+			var neighbour_force_value = 0
+			if force_mat[n] == force_direction:
+				neighbour_force_value = force_value
+			else:
+				neighbour_force_value = 0
+			
+			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass == 1:
+				new_state.is_player = true
+			
+			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass > 0:
+				new_state.sphere_mass = state.sphere_mass + force_value
 	
 	return state
 
