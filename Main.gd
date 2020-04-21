@@ -51,10 +51,8 @@ func _ready():
 			cells_state[x][y].geometry = sphere_playground.draw_cell(
 				cells_state[x][y], x, y
 			)
-			# cells_state[x][y].geometry = conway.draw_cell(
-			# 	cell[x][y], x, y
-			# )
-			
+			cells_state[x][y].visuals = sphere_playground.create_visuals(x, y)
+
 			# update player
 			var _player = sphere_playground.get_player(cells_state[x][y], x, y)
 			if _player != null:
@@ -149,10 +147,13 @@ func _process(_delta):
 			var need_update = new_cell_state != null and \
 				sort(new_cell_state).hash() != sort(current_cell.state).hash()
 			
+			if need_update:
+				sphere_playground.choose_visual(current_cell.visuals, current_cell.calc_count % 3)
 			if need_update or is_player:
 				new_cell = {
 					"state": new_cell_state,
 					"geometry": current_cell.geometry,
+					"visuals": current_cell.visuals,
 					"calc_count": current_cell.calc_count + 1,
 					"dirty": true
 				}
