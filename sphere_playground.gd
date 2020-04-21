@@ -158,6 +158,57 @@ func update_cell(state, neighbours, input):
 	
 	return state
 
+func create_mesh(cell_mesh, x, y, z): 
+	var cell_mesh_instance = MeshInstance.new()
+	
+	cell_mesh_instance.set_mesh(cell_mesh)
+	node_2d.add_child(cell_mesh_instance)
+	
+	cell_mesh_instance.set_translation(Vector3(x, y, z))
+	
+	cell_mesh_instance.visible = false
+	
+	return cell_mesh_instance
+
+func create_visuals(x, y):
+	var cube_mesh = CubeMesh.new()
+	cube_mesh.set_size(Vector3(0.1, 0.1, 0.1))
+
+	var pyramid_mesh = PrismMesh.new()
+	pyramid_mesh.set_size(Vector3(0.1, 0.1, 0.1))
+	var material = SpatialMaterial.new()
+	material.albedo_color = Color(1, 0, 0)
+	pyramid_mesh.surface_set_material(0, material)	
+
+	var sphere_mesh = SphereMesh.new()
+	sphere_mesh.set_radius(0.1)
+	sphere_mesh.set_height(0.1)
+	var sphere_material = SpatialMaterial.new()
+	sphere_material.albedo_color = Color(0, 0, 1)
+	sphere_mesh.surface_set_material(0, sphere_material)
+
+	var cell_size_x = mesh_instance_scale.x/cell_fn.X_SIZE
+	var cell_size_y = mesh_instance_scale.y/cell_fn.Y_SIZE
+
+	var x_position = mesh_instance_scale.x/cell_fn.X_SIZE * x + cell_size_x/2 - mesh_instance_scale.x/2
+	var y_position = mesh_instance_scale.y/cell_fn.Y_SIZE * y + cell_size_y/2 - mesh_instance_scale.y/2
+	
+	var cube = create_mesh(cube_mesh, x_position, 0.1, y_position)
+	var pyramid = create_mesh(pyramid_mesh, x_position, 0.1, y_position);
+	var sphere = create_mesh(sphere_mesh, x_position, 0.1, y_position);
+	
+	cube.set_visible(true)
+
+	return {
+		"active": 0,
+		"forms": [cube, pyramid, sphere]
+	}
+
+func choose_visual(visuals, active):
+	visuals.forms[visuals.active].visible = false
+	visuals.forms[active].visible = true
+	visuals.active = active
+	
 func get_player(current_cell, x, y):
 	if current_cell.state.is_player:
 		return {
