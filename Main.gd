@@ -194,6 +194,13 @@ func _process(_delta):
 				
 			else:
 				new_cell = current_cell
+				
+				if current_cell.dirty:
+					pass
+					# print("mark dirty")
+					# new_cell.calc_count = current_cell.calc_count + 1
+					# new_cell.geometry = sphere_playground.draw_cell(new_cell, x, y)
+				
 				new_cell.dirty = false
 			
 			col.append(new_cell)

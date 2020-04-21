@@ -20,9 +20,8 @@ func init_cell():
 		"cell_fn": cell_fn.FN_SPHERE_PLAYGROUND,
 		"sphere_mass": 0, # 0..100
 		"rotate": 0,
-		"force_value": 0,
-		"force": [0, 0, 0, 0], # top right down left
-		"is_player": false
+		"is_player": false,
+		"force_direction": -1
 	}
 
 func init_state(cells_state):
@@ -37,7 +36,7 @@ func draw_cell(cell, x, y):
 	var label_text = \
 		"m:" + str(cell.state.sphere_mass) + "\n" + \
 		"r:" + str(cell.state.rotate) + "\n" + \
-		"f:" + str(cell.state.force_value) + " " + \
+		"d:" + str(cell.state.force_direction) + " " + \
 		str(cell.calc_count)
 		# ("p" if cell.state.is_player else "") + \
 		
@@ -55,6 +54,12 @@ func draw_cell(cell, x, y):
 		cell_mesh.set_height(cell_size_x * size_this)
 		#cell_mesh.set_size(Vector3(cell_size_x * size_this, cell_size_x * size_this, cell_size_y * size_this))
 		cell_mesh_instance.set_mesh(cell_mesh)
+		
+		var material = SpatialMaterial.new()
+		material.flags_transparent = true
+		material.albedo_color = Color(0, 0, 1, 0.5)
+		cell_mesh_instance.set_surface_material(0, material)
+		
 		
 		#replace
 		var x_position = mesh_instance_scale.x/cell_fn.X_SIZE * x + cell_size_x/2 - mesh_instance_scale.x/2
@@ -91,14 +96,6 @@ func draw_cell(cell, x, y):
 func update_cell(state, neighbours, input):
 	var new_state = state
 	
-	# fet Von-neumann 1 rank
-	var vonneuman_neighbours = [
-		neighbours[3],
-		neighbours[5],
-		neighbours[7],
-		neighbours[1]
-	]
-	
 	var input_force_direction = 0
 	var force_value = 0
 	
@@ -108,14 +105,8 @@ func update_cell(state, neighbours, input):
 	if input.down:
 		input_force_direction = 3
 		force_value = 5
-	if input.left:
-		input_force_direction = 2
-		force_value = 5
-	if input.right:
-		input_force_direction = 0
-		force_value = 5
 	
-	var force_mat = [2, 3, 0, 1]
+	var force_mat = [4, 5 , 6 , 7, 0, 1, 2, 3]
 	
 	# calc is_player and sphere_mass
 	if state.is_player:
@@ -128,15 +119,25 @@ func update_cell(state, neighbours, input):
 			new_state.sphere_mass = state.sphere_mass - force_value
 		else:
 			new_state.sphere_mass = state.sphere_mass
+			
+		if input.left:
+			new_state.rotate = state.rotate + 5
+		if input.right:
+			new_state.rotate = state.rotate - 5
 		
 	else:
 		new_state.is_player = false
 		new_state.sphere_mass = state.sphere_mass
 		
-		for n in range(len(vonneuman_neighbours)):
-			var neighbour = vonneuman_neighbours[n]
+		new_state.force_direction = -1
+		
+		for n in range(len(neighbours)):
+			var neighbour = neighbours[n]
 			
-			var force_direction = (int((neighbour.rotate - 45)/90) + input_force_direction) % 4
+			var force_direction = (int((neighbour.rotate - 45/2)/45) + input_force_direction) % 8
+			
+			if neighbour.is_player:
+				new_state.force_direction = force_direction
 			
 			var neighbour_force_value = 0
 			if force_mat[n] == force_direction:
@@ -146,6 +147,7 @@ func update_cell(state, neighbours, input):
 			
 			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass == neighbour_force_value:
 				new_state.is_player = true
+				new_state.rotate = neighbour.rotate
 			
 			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass > 0:
 				new_state.sphere_mass = state.sphere_mass + force_value
