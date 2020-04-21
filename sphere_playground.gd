@@ -100,10 +100,10 @@ func update_cell(state, neighbours, input):
 	var force_value = 0
 	
 	if input.up:
-		input_force_direction = 1
+		input_force_direction = 0
 		force_value = 5
 	if input.down:
-		input_force_direction = 3
+		input_force_direction = 4
 		force_value = 5
 	
 	var force_mat = [4, 5 , 6 , 7, 0, 1, 2, 3]
@@ -134,7 +134,11 @@ func update_cell(state, neighbours, input):
 		for n in range(len(neighbours)):
 			var neighbour = neighbours[n]
 			
-			var force_direction = (int((neighbour.rotate - 45/2)/45) + input_force_direction) % 8
+			var force_direction = int(round(
+				(-neighbour.rotate)/45.0 + 1.0 + float(input_force_direction)
+			)) % 8
+			
+			force_direction = force_direction if force_direction > 0 else (force_direction + 8) % 8
 			
 			if neighbour.is_player:
 				new_state.force_direction = force_direction
