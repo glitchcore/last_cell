@@ -35,10 +35,10 @@ const DRAW_LABELS = true
 func draw_cell(cell, x, y):
 	var label_text = \
 		"m:" + str(cell.state.sphere_mass) + "\n" + \
-		"r:" + str(cell.state.rotate) + "\n" + \
-		"d:" + str(cell.state.force_direction) + " " + \
-		str(cell.calc_count)
-		# ("p" if cell.state.is_player else "") + \
+		"d:" + str(cell.state.force_direction) + "\n" + \
+		str(cell.calc_count) + " " + \
+		("p" if cell.state.is_player else "")
+		# "r:" + str(cell.state.rotate) + "\n" + \
 		
 	var size_this = float(cell.state.sphere_mass/100.0)
 	var cell_size_x = mesh_instance_scale.x/cell_fn.X_SIZE
@@ -57,7 +57,7 @@ func draw_cell(cell, x, y):
 		
 		var material = SpatialMaterial.new()
 		material.flags_transparent = true
-		material.albedo_color = Color(0, 0, 1, 0.5)
+		material.albedo_color = Color(1, 0, 1, 0.8)
 		cell_mesh_instance.set_surface_material(0, material)
 		
 		
@@ -110,16 +110,20 @@ func update_cell(state, neighbours, input):
 	
 	# calc is_player and sphere_mass
 	if state.is_player:
-		var neighboor_sphere_count = -2
+		var neighboor_sphere_count = -1
 		
 		for n in range(len(neighbours)):
 			var neighbour = neighbours[n]
-
-			if neighbour.sphere_mass > 0:
+			
+			var force_direction = int(round(
+				(-state.rotate)/45.0 + 1.0 + float(input_force_direction)
+			)) % 8
+			
+			if n != force_direction and neighbour.sphere_mass > 0:
 				neighboor_sphere_count += 1
 		
-		if neighboor_sphere_count == -2:
-			neighboor_sphere_count = -1
+		new_state.force_direction = neighboor_sphere_count
+		
 			
 		if force_value > 0 and state.sphere_mass == force_value:
 			new_state.is_player = false
