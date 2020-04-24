@@ -177,8 +177,8 @@ func _process(_delta):
 						
 						summ_mass += mass
 					
-					var player_x = float(a_x) / summ_mass
-					var player_y = float(a_y) / summ_mass
+					var player_x = float(a_x) / summ_mass if summ_mass > 0 else player.x
+					var player_y = float(a_y) / summ_mass if summ_mass > 0 else player.y
 					
 					player_node.translation = Vector3(
 						plane_size.x * (0.5 + player_x) / cell_fn.X_SIZE - plane_size.x/2,

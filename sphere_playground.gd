@@ -110,13 +110,24 @@ func update_cell(state, neighbours, input):
 	
 	# calc is_player and sphere_mass
 	if state.is_player:
+		var neighboor_sphere_count = -2
+		
+		for n in range(len(neighbours)):
+			var neighbour = neighbours[n]
+
+			if neighbour.sphere_mass > 0:
+				neighboor_sphere_count += 1
+		
+		if neighboor_sphere_count == -2:
+			neighboor_sphere_count = -1
+			
 		if force_value > 0 and state.sphere_mass == force_value:
 			new_state.is_player = false
 		else:
 			new_state.is_player = true
 			
 		if force_value > 0 and state.sphere_mass > 0:
-			new_state.sphere_mass = state.sphere_mass - force_value
+			new_state.sphere_mass = state.sphere_mass + force_value * neighboor_sphere_count
 		else:
 			new_state.sphere_mass = state.sphere_mass
 			
@@ -146,16 +157,19 @@ func update_cell(state, neighbours, input):
 			
 			var neighbour_force_value = 0
 			if force_mat[n] == force_direction:
-				neighbour_force_value = force_value
+				neighbour_force_value = 1
 			else:
-				neighbour_force_value = 0
+				if state.sphere_mass > 0:
+					neighbour_force_value = -1
+				else:
+					neighbour_force_value = 0
 			
-			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass == neighbour_force_value:
+			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass == force_value:
 				new_state.is_player = true
 				new_state.rotate = neighbour.rotate
 			
-			if neighbour_force_value > 0 and neighbour.is_player and neighbour.sphere_mass > 0:
-				new_state.sphere_mass = state.sphere_mass + force_value
+			if neighbour.is_player and neighbour.sphere_mass > 0:
+				new_state.sphere_mass = state.sphere_mass + force_value * neighbour_force_value
 	
 	return state
 
