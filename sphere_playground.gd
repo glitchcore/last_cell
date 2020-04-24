@@ -140,8 +140,9 @@ func update_cell(state, neighbours, input):
 			
 			force_direction = force_direction if force_direction > 0 else (force_direction + 8) % 8
 			
-			if neighbour.is_player:
-				new_state.force_direction = force_direction
+			# only for debugging
+			# if neighbour.is_player:
+			#	new_state.force_direction = force_direction
 			
 			var neighbour_force_value = 0
 			if force_mat[n] == force_direction:
