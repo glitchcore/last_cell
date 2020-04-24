@@ -92,7 +92,12 @@ func draw_cell(cell, x, y):
 		
 		return cell.geometry
 
-
+func mod(x, y):
+	if x > 0:
+		return x % y
+	else:
+		return (y - abs(x) % y) % y
+	
 func update_cell(state, neighbours, input):
 	var new_state = state
 	
@@ -101,10 +106,10 @@ func update_cell(state, neighbours, input):
 	
 	if input.up:
 		input_force_direction = 0
-		force_value = 5
+		force_value = 10
 	if input.down:
 		input_force_direction = 4
-		force_value = 5
+		force_value = 10
 	
 	var force_mat = [4, 5 , 6 , 7, 0, 1, 2, 3]
 	
@@ -112,17 +117,17 @@ func update_cell(state, neighbours, input):
 	if state.is_player:
 		var neighboor_sphere_count = -1
 		
+		var force_direction = mod(int(round(
+			8.0 + (-state.rotate)/45.0 + 1.0 + float(input_force_direction)
+		)), 8)
+		
 		for n in range(len(neighbours)):
 			var neighbour = neighbours[n]
-			
-			var force_direction = int(round(
-				(-state.rotate)/45.0 + 1.0 + float(input_force_direction)
-			)) % 8
 			
 			if n != force_direction and neighbour.sphere_mass > 0:
 				neighboor_sphere_count += 1
 		
-		new_state.force_direction = neighboor_sphere_count
+		new_state.force_direction = force_direction
 		
 			
 		if force_value > 0 and state.sphere_mass == force_value:
@@ -149,9 +154,9 @@ func update_cell(state, neighbours, input):
 		for n in range(len(neighbours)):
 			var neighbour = neighbours[n]
 			
-			var force_direction = int(round(
+			var force_direction = mod(int(round(
 				(-neighbour.rotate)/45.0 + 1.0 + float(input_force_direction)
-			)) % 8
+			)), 8)
 			
 			force_direction = force_direction if force_direction > 0 else (force_direction + 8) % 8
 			
