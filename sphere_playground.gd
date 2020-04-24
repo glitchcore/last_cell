@@ -33,11 +33,11 @@ func init_state(cells_state):
 const DRAW_LABELS = true
 
 func draw_cell(cell, x, y):
-	var label_text = \
-		"m:" + str(cell.state.sphere_mass) + "\n" + \
-		"d:" + str(cell.state.force_direction) + "\n" + \
-		str(cell.calc_count) + " " + \
-		("p" if cell.state.is_player else "")
+	var label_text = ""
+		# "m:" + str(cell.state.sphere_mass) + "\n" + \
+		# "d:" + str(cell.state.force_direction) + "\n" + \
+		# str(cell.calc_count) + " " + \
+		# ("p" if cell.state.is_player else "")
 		# "r:" + str(cell.state.rotate) + "\n" + \
 		
 	var size_this = float(cell.state.sphere_mass/100.0)
